@@ -9,7 +9,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Literal, Optional
+from typing import TYPE_CHECKING, Callable, Literal, Optional
+
+if TYPE_CHECKING:
+    from pvt import PvtTable
 
 
 @dataclass(frozen=True)
@@ -40,6 +43,13 @@ class DeckConfig:
     baseline_pb: float = 0.0
 
     flow_timeout_s: int = 1800
+
+    # Optional. When provided, the extractor reads PVT properties (Bo, Bg,
+    # Rs) from the .UNRST per-cell arrays and aggregates them by pore
+    # volume × phase saturation, instead of interpolating SPE9 tables on
+    # FPR. One PvtTable per PVTNUM region; cells are dispatched by their
+    # PVTNUM read from .INIT. For single-region decks the list has length 1.
+    pvt_tables: Optional[list["PvtTable"]] = None
 
     @property
     def summary_basename(self) -> str:

@@ -6,11 +6,13 @@ import re
 from pathlib import Path
 
 from .base import DeckConfig
+from pvt import parse_pvt_include
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DECK_DIR = PROJECT_ROOT / "models" / "norne"
 MAIN_DECK = "NORNE_ATW2013.DATA"
 EQUIL_INCLUDE_REL = "INCLUDE/PETRO/E3.prop"
+PVT_INCLUDE = DECK_DIR / "INCLUDE" / "PVT" / "PVT-WET-GAS.INC"
 
 
 LEVER_RANGES = {
@@ -100,4 +102,5 @@ CONFIG = DeckConfig(
     unit_system="METRIC",
     baseline_pb=BASELINE_PB_BAR,
     flow_timeout_s=1800,
+    pvt_tables=parse_pvt_include(PVT_INCLUDE, unit_system="METRIC"),
 )

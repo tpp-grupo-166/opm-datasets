@@ -18,6 +18,7 @@ import pandas as pd
 from resdata.summary import Summary
 
 from decks.base import DeckConfig
+from pvt_aggregate import aggregate_pvt
 from pvt_tables import bg_from_pressure, bo_from_pressure, rs_from_pressure
 
 
@@ -55,6 +56,7 @@ def extract_features(
     sim_id: int,
     params: dict,
 ) -> pd.DataFrame:
+    summary_basename = Path(summary_basename)
     sm = Summary(str(summary_basename))
 
     tiempo_dias = sm.numpy_vector("TIME")
@@ -91,9 +93,18 @@ def extract_features(
         pb_psi = config.baseline_pb + params.get("pb_shift", 0.0)
         pb_shift_for_pvt = params.get("pb_shift", 0.0)
 
-    rs = rs_from_pressure(fpr_psi, pb_shift_for_pvt)
-    bo = bo_from_pressure(fpr_psi, pb_shift_for_pvt)
-    bg = bg_from_pressure(fpr_psi)
+    if config.pvt_tables is not None:
+        sim_days, bo_cell_avg, bg_cell_avg, rs_cell_avg = aggregate_pvt(
+            summary_basename, config.pvt_tables, config.unit_system
+        )
+        # Align UNRST report-step series to SUMMARY tiempo_dias via linear interp
+        bo = np.interp(tiempo_dias, sim_days, bo_cell_avg)
+        bg = np.interp(tiempo_dias, sim_days, bg_cell_avg)
+        rs = np.interp(tiempo_dias, sim_days, rs_cell_avg)
+    else:
+        rs = rs_from_pressure(fpr_psi, pb_shift_for_pvt)
+        bo = bo_from_pressure(fpr_psi, pb_shift_for_pvt)
+        bg = bg_from_pressure(fpr_psi)
 
     porosidad = config.static_features["baseline_porosity"] * params["phi_mult"]
     permeabilidad = config.static_features["baseline_perm_md"] * params["k_mult"]

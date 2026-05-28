@@ -28,6 +28,8 @@ def run_simulation(
     runs_dir: Path,
     keep_outputs: bool = False,
 ) -> dict:
+    # Per-cell PVT extraction needs the .UNRST and .INIT alive during
+    # extract_features; the finally block still cleans up afterwards.
     sim_dir = runs_dir / f"{config.name}_sim_{sim_id:04d}"
     if sim_dir.exists():
         shutil.rmtree(sim_dir)

@@ -6,10 +6,12 @@ import re
 from pathlib import Path
 
 from .base import DeckConfig
+from pvt import parse_pvt_include
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DECK_DIR = PROJECT_ROOT / "models" / "volve"
 MAIN_DECK = "VOLVE_2016.DATA"
+PVT_INCLUDE = DECK_DIR / "pvt_input_new_combined_PVDG_020610_perch_water_2914m.E100"
 
 
 LEVER_RANGES = {
@@ -120,4 +122,5 @@ CONFIG = DeckConfig(
     unit_system="METRIC",
     baseline_pb=BASELINE_PB_BAR,
     flow_timeout_s=5400,
+    pvt_tables=parse_pvt_include(PVT_INCLUDE, unit_system="METRIC"),
 )
